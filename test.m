@@ -1,44 +1,64 @@
-% Parameters
-amplitude = 1;          % Amplitude of the wave
-frequency = 10;          % Frequency of the wave
-speed = 1;              % Propagation speed of the wave
-time = linspace(0, 10, 100); % Time values
+% Parâmetros
+freq = 10;
+vel = 5;
+lambda = vel / freq;
 
-% Initialize figure
+amp_e = 1;
+amp_m = 1;      % Ajuste valores dos parâmetros de acordo com a necessidade.
+
+t = linspace(0, 10, 1000); % Vetor Tempo
+x = linspace(0, 10, 1000); % Vetor espacial ao longo do eixo X
+y = linspace(-2, 2, 1000); % Vetor espacial ao longo do eixo Y
+z = linspace(-2, 2, 1000); % Vetor espacial ao longo do eixo Z
+
+% Criar matriz para armazenar a amplitude da onda elétrica
+e_wave = zeros(size(x));
+
 figure;
-xlabel('X');
-ylabel('Y');
-zlabel('Z');
-title('3D Plot of Sinusoidal Wave Propagating Along X-axis');
+hold on;
+
+% Nomes dos eixos
+xlabel('x');
+ylabel('Electric Field');
+zlabel('Magnetic Field');
+title('Electromagnetic Waves Propagation');
+
+% Definir fonte de OEM como uma esfera
+[X, Y, Z] = sphere;
+radius = 0.4;
+X1 = radius * X;
+Y1 = radius * Y;
+Z1 = radius * Z;
+surf(X1, Y1, Z1);
+
+% Definir limites dos eixos
+xlim([-10, 10]);
+ylim([-10, 10]);
+zlim([-10, 10]);
 grid on;
-axis tight;
+daspect([1 1 1]);
 
-% Preallocate data arrays
-x_data = zeros(size(time));
-y_data = zeros(size(time));
-z_data = zeros(size(time));
+e_plot = plot3(x, zeros(size(x)), zeros(size(x)), 'b');
+m_plot = plot3(x, zeros(size(x)), zeros(size(x)), 'r');
+axis vis3d;
 
-% Animation loop
-for idx = 1:length(time)
-    t = time(idx);
-    % Calculate the x, y, and z coordinates for the wave at the current time
-    x_data(idx) = speed * t;               % Propagation along x-axis
-    y_data(idx) = amplitude * sin(2 * pi * frequency * t);  % Sinusoidal wave
-    z_data(idx) = 0;                       % No variation along z-axis
+for i = 1:length(t)
+    % Calcular a amplitude da onda elétrica
+    e_wave = amp_e * sin(2*pi*freq*t(i) - 2*pi*freq*x/vel);
     
-    % Linear attenuation of amplitude after x = 5
-    if x_data(idx) > 5
-        y_data(idx) = y_data(idx) * exp(-0.5*x_data(idx)); % Linear attenuation
-    end
+    %disp (e_wave);
+    % Aplicar atenuação após x = 5
+    idx = x > 5 & x <= 7;
+    e_wave(idx) = e_wave(idx) .* (1 - (x(idx) - 5) / 5);
     
-    % Plot the wave at the current time
-    set(plot3(x_data, y_data, z_data, 'LineWidth', 2), 'XData', x_data(1:idx), 'YData', y_data(1:idx), 'ZData', z_data(1:idx));
-    
-    % Adjust axis limits if needed
-    xlim([0, max(time)]);
-    ylim([-amplitude, amplitude]);
-    zlim([-amplitude, amplitude]);
-    
-    % Pause to control the animation speed
-    pause(0.1);
+    idx_att = x > 7;
+    e_wave(idx_att) = e_wave(idx);
+
+    % Atualizar a plotagem
+    set(e_plot, 'YData', e_wave);
+    set(m_plot, 'ZData', e_wave); % Para visualização, usamos a mesma amplitude para o campo magnético
+    pause(0.01);
+    drawnow;
+
 end
+hold off;
