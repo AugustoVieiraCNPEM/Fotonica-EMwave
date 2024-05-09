@@ -25,13 +25,15 @@ for i = 1:num_samples
     for j = 1:num_samples
         % Distância radial do ponto (x,y) ao centro do meio
         r = sqrt((x(i)-L/2)^2 + (y(j)-L/2)^2);
-        r_dis = sqrt((x(i)-L/2)^2 + (y(j)-L/2)^2) - sqrt((x(20)-L/2)^2+(y(j)-L/2)^2);
+        r_dir = abs(sqrt((x(i)-L/2)^2 + (y(j)-L/2)^2) - sqrt((x(20)-L/2)^2+(y(20)-L/2)^2));
+        r_esq = abs(sqrt((x(i)-L/2)^2 + (y(j)-L/2)^2) - sqrt((x(20)-L/2)^2+(y(20)-L/2)^2));
         % Verifica se a posição está na região dissipativa
-        if x(i) >= 0 && x(i) <= 20
-            % Atualização da amplitude da onda na região dissipativa
-            A(i,j) = amplitude * exp(-k*r_dis) * cos(r);
+        if x(i) >= 0 && x(i) < 20  | y(j)< 20 && y(j)>=0          % Atualização da amplitude da onda na região dissipativa
+            A(i,j) = amplitude * exp(-k*r_dir) * cos(r);
+        elseif x(i) >= 80 && x(i) <= 100 || y(j) >= 80 && y(j) <= 100
+            A(i,j) = amplitude * exp(-k*r_esq) * cos(r);
         else
-            % Atualização da amplitude da onda na região ideal
+            % Atualização da amplitude da onda n a região ideal
             A(i,j) = amplitude * cos(r);
         end
     end
@@ -40,8 +42,8 @@ end
 % Plotagem da amplitude da onda em relação à posição no plano XY
 surf(x, y, A);
 %daspect([25 25 1])
-xlabel('Posição X');
-ylabel('Posição Y');
+xlabel('Posição Y');
+ylabel('Posição X');
 zlabel('Amplitude da Onda');
 title('Propagação de uma Onda Eletromagnética (Infravermelha) com interface entre Meio Dissipativo e Ideal no Plano XY');
 
